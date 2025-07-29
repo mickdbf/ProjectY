@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ title }}</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0; padding: 0;
+      display: flex; flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background-color: #fff;
+    }
+    #logo {
+      font-size: 64px;
+      font-weight: bold;
+      color: #4285f4;
+      margin-bottom: 20px;
+    }
+    #search-box {
+      width: 500px;
+      max-width: 90%;
+      display: flex;
+      border: 1px solid #ddd;
+      border-radius: 24px;
+      padding: 10px 20px;
+      box-shadow: 0 2px 5px rgb(0 0 0 / 0.1);
+    }
+    #search-input {
+      border: none;
+      outline: none;
+      flex-grow: 1;
+      font-size: 18px;
+    }
+    #search-button {
+      background-color: #4285f4;
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 24px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-left: 10px;
+      transition: background-color 0.3s ease;
+    }
+    #search-button:hover {
+      background-color: #357ae8;
+    }
+  </style>
+</head>
+<body>
+  <div id="logo">ProjectX</div>
+  <form id="search-box" action="/" method="get">
+    <input id="search-input" name="q" type="text" placeholder="Search ProjectX..." />
+    <button id="search-button" type="submit">Search</button>
+  </form>
+</body>
+</html>
