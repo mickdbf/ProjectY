@@ -2,60 +2,155 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{{ title }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SquadMatch.gg</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
   <style>
     body {
-      font-family: Arial, sans-serif;
-      margin: 0; padding: 0;
-      display: flex; flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      background-color: #fff;
+      margin: 0;
+      font-family: 'Orbitron', sans-serif;
+      background-color: #121212;
+      color: #f5f5f5;
     }
-    #logo {
-      font-size: 64px;
-      font-weight: bold;
-      color: #4285f4;
-      margin-bottom: 20px;
-    }
-    #search-box {
-      width: 500px;
-      max-width: 90%;
+
+    header {
+      background: #1f1f1f;
+      padding: 1rem 2rem;
       display: flex;
-      border: 1px solid #ddd;
-      border-radius: 24px;
-      padding: 10px 20px;
-      box-shadow: 0 2px 5px rgb(0 0 0 / 0.1);
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #333;
     }
-    #search-input {
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #00ffe1;
+    }
+
+    .steam-login {
+      background: #171a21;
+      color: #fff;
+      padding: 0.5rem 1rem;
       border: none;
-      outline: none;
-      flex-grow: 1;
-      font-size: 18px;
+      border-radius: 5px;
+      cursor: pointer;
     }
-    #search-button {
-      background-color: #4285f4;
+
+    .filters {
+      display: flex;
+      gap: 1rem;
+      margin: 1rem 2rem;
+      flex-wrap: wrap;
+    }
+
+    .filters select {
+      padding: 0.5rem;
+      background: #2a2a2a;
       border: none;
       color: white;
-      padding: 8px 16px;
-      border-radius: 24px;
-      cursor: pointer;
-      font-size: 16px;
-      margin-left: 10px;
-      transition: background-color 0.3s ease;
+      border-radius: 4px;
     }
-    #search-button:hover {
-      background-color: #357ae8;
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1.5rem;
+      padding: 2rem;
+    }
+
+    .card {
+      background: #1e1e1e;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,255,225,0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: transform 0.2s ease;
+    }
+
+    .card:hover {
+      transform: scale(1.02);
+    }
+
+    .avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      margin-bottom: 1rem;
+    }
+
+    .username {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .tags {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .tag {
+      background: #00ffe1;
+      color: #121212;
+      padding: 0.25rem 0.5rem;
+      border-radius: 5px;
+      font-size: 0.8rem;
     }
   </style>
 </head>
 <body>
-  <div id="logo">ProjectX</div>
-  <form id="search-box" action="/" method="get">
-    <input id="search-input" name="q" type="text" placeholder="Search ProjectX..." />
-    <button id="search-button" type="submit">Search</button>
-  </form>
+  <header>
+    <div class="logo">SquadMatch.gg</div>
+    <button class="steam-login">Sign in with Steam</button>
+  </header>
+
+  <div class="filters">
+    <select>
+      <option selected disabled>Choose Game</option>
+      <option>Valorant</option>
+      <option>Apex Legends</option>
+      <option>CS2</option>
+    </select>
+    <select>
+      <option selected disabled>Skill Level</option>
+      <option>Casual</option>
+      <option>Intermediate</option>
+      <option>Competitive</option>
+    </select>
+    <select>
+      <option selected disabled>Voice Chat</option>
+      <option>Required</option>
+      <option>Optional</option>
+      <option>No Mic</option>
+    </select>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <img class="avatar" src="https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/ee/eeb0a9f4a35a7ff1fb17bb98b2cfd15810c1ccfa_full.jpg" alt="User Avatar" />
+      <div class="username">🔥 ClutchKing</div>
+      <div class="tags">
+        <div class="tag">Valorant</div>
+        <div class="tag">Competitive</div>
+        <div class="tag">Mic</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <img class="avatar" src="https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/d1/d15579ef1905f80a366993d1d1eea3b9cdb93775_full.jpg" alt="User Avatar" />
+      <div class="username">SniperWolf</div>
+      <div class="tags">
+        <div class="tag">Apex Legends</div>
+        <div class="tag">Intermediate</div>
+        <div class="tag">No Mic</div>
+      </div>
+    </div>
+
+    <!-- Add more mock player cards here -->
+  </div>
 </body>
 </html>
