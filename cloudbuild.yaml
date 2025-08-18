@@ -16,5 +16,5 @@ steps:
         "--image", "gcr.io/$projectx-469323/myapp:$COMMIT_SHA",
         "--region", "us-central1",
         "--platform", "managed"
-        #"--allow-unauthenticated" #Uncomment to make website public
+        #"--allow-unauthenticated" ##Uncomment to make website public
       ]
