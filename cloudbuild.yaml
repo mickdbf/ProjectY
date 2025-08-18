@@ -1,11 +1,14 @@
+options:
+  logging: CLOUD_LOGGING_ONLY
+
 steps:
   # Build Docker image
   - name: gcr.io/cloud-builders/docker
-    args: ["build", "-t", "gcr.io/$projectx-469323/myapp:$COMMIT_SHA", "."]
+    args: ["build", "-t", "gcr.io/projectx-469323/myapp:$COMMIT_SHA", "."]
 
   # Push image to Artifact Registry
   - name: gcr.io/cloud-builders/docker
-    args: ["push", "gcr.io/$projectx-469323/myapp:$COMMIT_SHA"]
+    args: ["push", "gcr.io/projectx-469323/myapp:$COMMIT_SHA"]
 
   # Deploy to Cloud Run
   - name: gcr.io/google.com/cloudsdktool/cloud-sdk
@@ -13,8 +16,7 @@ steps:
     args:
       [
         "run", "deploy", "myapp",
-        "--image", "gcr.io/$projectx-469323/myapp:$COMMIT_SHA",
+        "--image", "gcr.io/projectx-469323/myapp:$COMMIT_SHA",
         "--region", "us-central1",
         "--platform", "managed"
-        #"--allow-unauthenticated" ##Uncomment to make website public
       ]
