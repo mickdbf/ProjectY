@@ -17,7 +17,8 @@ steps:
         "run", "deploy", "myapp",
         "--image", "gcr.io/$PROJECT_ID/myapp:$COMMIT_SHA",
         "--region", "us-central1",
-        "--platform", "managed"
+        "--platform", "managed",
+        "--allow-unauthenticated"
       ]
 
 options:
