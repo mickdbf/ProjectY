@@ -32,7 +32,7 @@ steps:
         "--platform",
         "managed"
       ]
-#
+##
 # Send logs only to Cloud Logging (avoids service account logging errors)
 options:
   logging: CLOUD_LOGGING_ONLY
