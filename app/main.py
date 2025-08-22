@@ -3,17 +3,6 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 import os
 
-'''
-ToDo after cloning:
-Enter the commands in the terminal to create and 
-activate the virtual environment for the project.
-Then install the requirements.
-
-python -m venv venv
-source venv/bin/activate   # (Linux/Mac)
-venv\Scripts\activate      # (Windows)
-pip install -r requirements.txt
-'''
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
