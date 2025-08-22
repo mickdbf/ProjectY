@@ -5,8 +5,9 @@ import os
 
 
 app = FastAPI()
-templates = Jinja2Templates(directory="templates")
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # directory of main.py
+templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request, "title": "Welcome to ProjectX"})
