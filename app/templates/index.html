@@ -3,154 +3,135 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SquadMatch.gg</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
+  <title>ProjectX</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
-      font-family: 'Orbitron', sans-serif;
-      background-color: #121212;
-      color: #f5f5f5;
+      font-family: 'Inter', sans-serif;
+      background-color: #f4f4f9;
+      color: #1a1a1a;
     }
 
     header {
-      background: #1f1f1f;
-      padding: 1rem 2rem;
+      background-color: #1a1a1a;
+      color: #ffffff;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid #333;
+      padding: 1rem 2rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
 
     .logo {
+      font-weight: 700;
       font-size: 1.5rem;
-      font-weight: bold;
-      color: #00ffe1;
+      letter-spacing: 1px;
     }
 
-    .steam-login {
-      background: #171a21;
-      color: #fff;
+    nav button {
+      background-color: #4f46e5;
+      color: white;
       padding: 0.5rem 1rem;
       border: none;
-      border-radius: 5px;
+      border-radius: 6px;
       cursor: pointer;
+      font-weight: 600;
     }
 
-    .filters {
-      display: flex;
-      gap: 1rem;
-      margin: 1rem 2rem;
-      flex-wrap: wrap;
-    }
-
-    .filters select {
-      padding: 0.5rem;
-      background: #2a2a2a;
-      border: none;
-      color: white;
-      border-radius: 4px;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 1.5rem;
-      padding: 2rem;
-    }
-
-    .card {
-      background: #1e1e1e;
-      padding: 1rem;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,255,225,0.1);
+    .hero {
       display: flex;
       flex-direction: column;
       align-items: center;
-      transition: transform 0.2s ease;
+      justify-content: center;
+      text-align: center;
+      padding: 4rem 2rem;
+      background: linear-gradient(135deg, #4f46e5, #6366f1);
+      color: white;
     }
 
-    .card:hover {
-      transform: scale(1.02);
-    }
-
-    .avatar {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
+    .hero h1 {
+      font-size: 3rem;
       margin-bottom: 1rem;
     }
 
-    .username {
+    .hero p {
       font-size: 1.2rem;
+      max-width: 600px;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+      padding: 4rem 2rem;
+    }
+
+    .feature-card {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    .feature-card h3 {
+      margin-top: 0;
       margin-bottom: 0.5rem;
+      font-size: 1.2rem;
+      color: #4f46e5;
     }
 
-    .tags {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-      justify-content: center;
+    .feature-card p {
+      margin: 0;
+      font-size: 0.95rem;
+      color: #555;
     }
 
-    .tag {
-      background: #00ffe1;
-      color: #121212;
-      padding: 0.25rem 0.5rem;
-      border-radius: 5px;
-      font-size: 0.8rem;
+    footer {
+      text-align: center;
+      padding: 2rem;
+      background-color: #1a1a1a;
+      color: #fff;
+      font-size: 0.9rem;
     }
   </style>
 </head>
 <body>
   <header>
-    <div class="logo">SquadMatch.gg</div>
-    <button class="steam-login">Sign in with Steam</button>
+    <div class="logo">ProjectX</div>
+    <nav>
+      <button>Get Started</button>
+    </nav>
   </header>
 
-  <div class="filters">
-    <select>
-      <option selected disabled>Choose Game</option>
-      <option>Valorant</option>
-      <option>Apex Legends</option>
-      <option>CS2</option>
-    </select>
-    <select>
-      <option selected disabled>Skill Level</option>
-      <option>Casual</option>
-      <option>Intermediate</option>
-      <option>Competitive</option>
-    </select>
-    <select>
-      <option selected disabled>Voice Chat</option>
-      <option>Required</option>
-      <option>Optional</option>
-      <option>No Mic</option>
-    </select>
-  </div>
+  <section class="hero">
+    <h1>Welcome to ProjectX</h1>
+    <p>ProjectX is a modern platform for managing your projects efficiently. Collaborate, track, and innovate all in one place.</p>
+  </section>
 
-  <div class="grid">
-    <div class="card">
-      <img class="avatar" src="https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/ee/eeb0a9f4a35a7ff1fb17bb98b2cfd15810c1ccfa_full.jpg" alt="User Avatar" />
-      <div class="username">🔥 ClutchKing</div>
-      <div class="tags">
-        <div class="tag">Valorant</div>
-        <div class="tag">Competitive</div>
-        <div class="tag">Mic</div>
-      </div>
+  <section class="features">
+    <div class="feature-card">
+      <h3>Collaborate Easily</h3>
+      <p>Work with your team seamlessly, share updates, and manage tasks in real time.</p>
     </div>
-
-    <div class="card">
-      <img class="avatar" src="https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/d1/d15579ef1905f80a366993d1d1eea3b9cdb93775_full.jpg" alt="User Avatar" />
-      <div class="username">SniperWolf</div>
-      <div class="tags">
-        <div class="tag">Apex Legends</div>
-        <div class="tag">Intermediate</div>
-        <div class="tag">No Mic</div>
-      </div>
+    <div class="feature-card">
+      <h3>Track Progress</h3>
+      <p>Monitor project status and stay on top of deadlines with intuitive dashboards.</p>
     </div>
+    <div class="feature-card">
+      <h3>Secure & Reliable</h3>
+      <p>Your data is protected with industry-standard security measures and cloud reliability.</p>
+    </div>
+  </section>
 
-    <!-- Add more mock player cards here -->
-  </div>
+  <footer>
+    &copy; 2025 ProjectX. All rights reserved.
+  </footer>
 </body>
 </html>
