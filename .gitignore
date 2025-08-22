@@ -1,3 +1,9 @@
-/.venv/
+
 __pycache__/
 *.pyc
+
+# Environment
+/.venv/
+
+#DB info
+.env
