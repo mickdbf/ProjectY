@@ -1,4 +1,16 @@
-/.venv/
+# Python cache
 __pycache__/
+**/__pycache__/
+
+# Environment
+.venv/
+venv/
+.env
+
+# IDE/editor configs
 *.pyc
-.github
+*.pyo
+*.pyd
+*.swp
+.idea/
+.vscode/
