@@ -1,9 +1,16 @@
-
+# Python cache
 __pycache__/
-*.pyc
+**/__pycache__/
 
 # Environment
-/.venv/
-
-#DB info
+.venv/
+venv/
 .env
+
+# IDE/editor configs
+*.pyc
+*.pyo
+*.pyd
+*.swp
+.idea/
+.vscode/
