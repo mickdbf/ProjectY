@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EasyNote AI – Generate Notes</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(25px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeUp 1s ease-out both; }
+
+    * {
+      transition: all 0.2s ease-in-out;
+    }
+
+    body {
+      background:
+        linear-gradient(rgba(248, 250, 255, 0.9), rgba(255, 255, 255, 0.95)),
+        url('https://media.istockphoto.com/id/173153967/photo/blue-graph-paper-background-textured.jpg?s=612x612&w=0&k=20&c=hZQ5_Hzo7tpgMOkbmqDJMc89WzEQx2zLU7tU6SWyOa0=');
+      background-size: cover;
+      background-attachment: fixed;
+      background-position: center;
+      background-repeat: no-repeat;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .glass {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(8px);
+    }
+  </style>
+</head>
+
+<body class="text-gray-800">
+  <!-- Header -->
+  <header class="bg-white/80 backdrop-blur-md shadow-sm py-4 px-8 flex justify-between items-center fixed top-0 left-0 right-0 z-50">
+    <h1 class="text-2xl font-bold text-blue-700 tracking-tight">
+      EasyNote <span class="text-indigo-600">AI</span>
+    </h1>
+
+    <!-- ✅ User Info with dropdown and fallback avatar -->
+    <div class="relative flex items-center space-x-4">
+      <div class="text-right">
+        <p class="text-sm text-gray-700 font-semibold">Welcome</p>
+        <p class="text-sm text-gray-500">{{ user_email }}</p>
+      </div>
+
+      <!-- Avatar / Initial -->
+      <div id="avatarBtn" class="relative cursor-pointer">
+        {% if user_picture %}
+          <img src="{{ user_picture }}" alt="User Avatar"
+               class="w-9 h-9 rounded-full border border-gray-300 shadow-sm hover:ring-2 hover:ring-blue-400" />
+        {% else %}
+          <div class="w-9 h-9 rounded-full flex items-center justify-center font-semibold text-white bg-gradient-to-r from-blue-500 to-indigo-500 shadow-sm hover:ring-2 hover:ring-blue-400">
+            {{ user_email[0]|upper }}
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Dropdown Menu -->
+      <div id="profileMenu" class="absolute top-12 right-0 bg-white/95 backdrop-blur-md border border-gray-200 rounded-xl shadow-lg hidden w-40 text-sm">
+        <a href="https://drive.google.com/drive/my-drive" target="_blank"
+           class="block px-4 py-2 text-gray-700 hover:bg-blue-50 rounded-t-xl">My Drive</a>
+        <a href="/logout"
+           class="block px-4 py-2 text-gray-700 hover:bg-blue-50 rounded-b-xl">Logout</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Upload Section -->
+  <section class="pt-28 pb-20 text-center px-6 fade-up">
+    <h2 class="text-4xl font-bold text-blue-700 mb-6">Upload Your Lecture Slides</h2>
+    <p class="text-gray-600 mb-10 text-lg">Choose your note style and generate AI-powered notes instantly.</p>
+
+    <div class="mx-auto glass shadow-lg rounded-2xl p-10 w-full max-w-lg border border-gray-100">
+      <form id="uploadForm" enctype="multipart/form-data">
+        <label class="block text-gray-700 font-semibold mb-3">Select your lecture file</label>
+        <input type="file" name="file"
+               class="w-full border-2 border-dashed border-blue-300 p-6 rounded-lg cursor-pointer text-gray-500 hover:border-blue-500 bg-blue-50/40 transition" />
+
+        <label class="block text-gray-700 font-semibold mt-6 mb-3">Choose your note style</label>
+        <select name="style"
+                class="w-full border border-gray-300 rounded-lg p-3 bg-white focus:border-blue-500 focus:ring-blue-500">
+          <option value="outline">Simple Outline</option>
+          <option value="detailed">Detailed Notes</option>
+          <option value="cheatsheet">Cheat Sheet</option>
+        </select>
+
+        <button type="submit"
+                class="mt-8 w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 rounded-xl shadow-md transition transform hover:scale-[1.02]">
+          Generate Notes
+        </button>
+      </form>
+    </div>
+
+    <!-- Results Section -->
+    <div id="results" class="hidden mt-12 glass p-8 rounded-2xl shadow-lg max-w-2xl mx-auto border border-gray-100 text-left">
+      <h3 class="text-2xl font-bold text-blue-700 mb-4">Your Notes Are Ready!</h3>
+      <ul id="fileList" class="space-y-4"></ul>
+    </div>
+  </section>
+
+  <footer class="bg-white/80 backdrop-blur-md text-gray-500 text-sm py-6 text-center border-t border-gray-200">
+    © 2025 EasyNote AI by Everyday Intelligence
+  </footer>
+
+  <!-- Script -->
+  <script>
+    const form = document.getElementById("uploadForm");
+    const results = document.getElementById("results");
+    const fileList = document.getElementById("fileList");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+
+      const button = form.querySelector("button");
+      button.disabled = true;
+      const oldText = button.innerText;
+      button.innerText = "Processing...";
+      button.classList.add("opacity-70", "cursor-not-allowed");
+
+      try {
+        const response = await fetch("/generate", { method: "POST", body: formData });
+        const data = await response.json();
+
+        results.classList.remove("hidden");
+        fileList.innerHTML = data.files.map(
+          f => `
+            <li class="flex justify-between items-center border-b pb-3">
+              <div>
+                <h4 class="font-semibold text-gray-800">${f.name}</h4>
+                <p class="text-sm text-gray-500">Saved to Google Drive just now</p>
+              </div>
+              <a href="${f.link}" target="_blank"
+                 class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-sm transition">Open</a>
+            </li>`
+        ).join("");
+
+        showToast("✅ Notes saved to Google Drive");
+      } finally {
+        button.disabled = false;
+        button.innerText = oldText;
+        button.classList.remove("opacity-70", "cursor-not-allowed");
+      }
+    });
+
+    // ✅ Profile menu toggle
+    const avatarBtn = document.getElementById("avatarBtn");
+    const profileMenu = document.getElementById("profileMenu");
+    let menuVisible = false;
+
+    avatarBtn.addEventListener("click", () => {
+      menuVisible = !menuVisible;
+      profileMenu.classList.toggle("hidden", !menuVisible);
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!avatarBtn.contains(e.target) && !profileMenu.contains(e.target)) {
+        profileMenu.classList.add("hidden");
+        menuVisible = false;
+      }
+    });
+
+    // ✅ Toast notification
+    function showToast(message) {
+      const toast = document.createElement("div");
+      toast.className =
+        "fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-sm px-6 py-3 rounded-xl shadow-lg fade-up";
+      toast.innerText = message;
+      document.body.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = "0";
+        toast.style.transform = "translate(-50%, 20px)";
+      }, 2500);
+      setTimeout(() => toast.remove(), 3000);
+    }
+  </script>
+</body>
+</html>
