@@ -41,7 +41,7 @@
       EasyNote <span class="text-indigo-600">AI</span>
     </h1>
 
-    <!-- ✅ User Info with dropdown and fallback avatar -->
+    <!-- User Info with dropdown and fallback avatar -->
     <div class="relative flex items-center space-x-4">
       <div class="text-right">
         <p class="text-sm text-gray-700 font-semibold">Welcome</p>
@@ -140,7 +140,7 @@
             </li>`
         ).join("");
 
-        showToast("✅ Notes saved to Google Drive");
+        showToast("Notes saved to Google Drive");
       } finally {
         button.disabled = false;
         button.innerText = oldText;
@@ -148,7 +148,7 @@
       }
     });
 
-    // ✅ Profile menu toggle
+    // Profile menu toggle
     const avatarBtn = document.getElementById("avatarBtn");
     const profileMenu = document.getElementById("profileMenu");
     let menuVisible = false;
@@ -165,7 +165,7 @@
       }
     });
 
-    // ✅ Toast notification
+    // Toast notification
     function showToast(message) {
       const toast = document.createElement("div");
       toast.className =
