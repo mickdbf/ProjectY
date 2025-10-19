@@ -11,7 +11,6 @@
       to { opacity: 1; transform: translateY(0); }
     }
     .fade-up { animation: fadeUp 1s ease-out both; }
-
     * { transition: all 0.2s ease-in-out; }
 
     body {
@@ -30,10 +29,7 @@
       backdrop-filter: blur(8px);
     }
 
-    pre {
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
+    pre { white-space: pre-wrap; word-break: break-word; }
   </style>
 </head>
 
@@ -51,16 +47,20 @@
         <p class="text-sm text-gray-500">{{ user_email }}</p>
       </div>
 
-      {% if user_picture %}
-        <img src="{{ user_picture }}" alt="User Avatar"
-             class="w-9 h-9 rounded-full border border-gray-300 shadow-sm hover:ring-2 hover:ring-blue-400 cursor-pointer"
-             id="avatarBtn" />
-      {% else %}
-        <div id="avatarBtn"
-             class="w-9 h-9 rounded-full flex items-center justify-center font-semibold text-white bg-gradient-to-r from-blue-500 to-indigo-500 shadow-sm hover:ring-2 hover:ring-blue-400 cursor-pointer">
+      <!-- Avatar Button -->
+      <button type="button"
+              id="avatarBtn"
+              class="relative w-9 h-9 rounded-full border border-gray-300 shadow-sm hover:ring-2 hover:ring-blue-400 cursor-pointer overflow-hidden flex items-center justify-center bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold">
+        {% if user_picture %}
+          <img src="{{ user_picture }}"
+               alt="{{ user_email }}"
+               class="absolute inset-0 w-full h-full object-cover rounded-full"
+               onerror="this.style.display='none'; this.closest('button').querySelector('.avatar-fallback').classList.remove('hidden');" />
+        {% endif %}
+        <span class="avatar-fallback {% if user_picture %}hidden{% endif %}">
           {{ user_email[0]|upper }}
-        </div>
-      {% endif %}
+        </span>
+      </button>
 
       <!-- Dropdown -->
       <div id="profileMenu"
@@ -167,7 +167,10 @@
     // Profile dropdown
     const avatarBtn = document.getElementById("avatarBtn");
     const profileMenu = document.getElementById("profileMenu");
-    avatarBtn.addEventListener("click", () => profileMenu.classList.toggle("hidden"));
+    avatarBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      profileMenu.classList.toggle("hidden");
+    });
     document.addEventListener("click", (e) => {
       if (!avatarBtn.contains(e.target) && !profileMenu.contains(e.target)) {
         profileMenu.classList.add("hidden");
