@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EasyNote AI – Generate Notes</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(25px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeUp 1s ease-out both; }
+    * { transition: all 0.2s ease-in-out; }
+
+    body {
+      background:
+        linear-gradient(rgba(248, 250, 255, 0.9), rgba(255, 255, 255, 0.95)),
+        url('https://media.istockphoto.com/id/173153967/photo/blue-graph-paper-background-textured.jpg?s=612x612&w=0&k=20&c=hZQ5_Hzo7tpgMOkbmqDJMc89WzEQx2zLU7tU6SWyOa0=');
+      background-size: cover;
+      background-attachment: fixed;
+      background-position: center;
+      background-repeat: no-repeat;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .glass {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(8px);
+    }
+
+    pre { white-space: pre-wrap; word-break: break-word; }
+  </style>
+</head>
+
+<body class="text-gray-800">
+  <!-- Header -->
+  <header class="bg-white/80 backdrop-blur-md shadow-sm py-4 px-8 flex justify-between items-center fixed top-0 left-0 right-0 z-50">
+    <h1 class="text-2xl font-bold text-blue-700 tracking-tight">
+      EasyNote <span class="text-indigo-600">AI</span>
+    </h1>
+
+    <div class="relative flex items-center space-x-4">
+      <div class="text-right">
+        <p class="text-sm text-gray-700 font-semibold">Welcome</p>
+        <p class="text-sm text-gray-500">{{ user_email }}</p>
+      </div>
+
+      <!-- Avatar -->
+      <button id="avatarBtn"
+        class="relative w-9 h-9 rounded-full border border-gray-300 shadow-sm hover:ring-2 hover:ring-blue-400 cursor-pointer overflow-hidden flex items-center justify-center bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold">
+        {% if user_picture %}
+          <img src="{{ user_picture }}" alt="{{ user_email }}"
+            class="absolute inset-0 w-full h-full object-cover rounded-full"
+            onerror="this.style.display='none'; this.closest('button').querySelector('.avatar-fallback').classList.remove('hidden');" />
+        {% endif %}
+        <span class="avatar-fallback {% if user_picture %}hidden{% endif %}">
+          {{ user_email[0]|upper }}
+        </span>
+      </button>
+
+      <!-- Dropdown -->
+      <div id="profileMenu"
+        class="absolute top-12 right-0 bg-white/95 backdrop-blur-md border border-gray-200 rounded-xl shadow-lg hidden w-40 text-sm">
+        <a href="https://drive.google.com/drive/my-drive" target="_blank"
+          class="block px-4 py-2 text-gray-700 hover:bg-blue-50 rounded-t-xl">My Drive</a>
+        <a href="/logout"
+          class="block px-4 py-2 text-gray-700 hover:bg-blue-50 rounded-b-xl">Logout</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Upload Section -->
+  <section class="pt-28 pb-20 text-center px-6 fade-up">
+    <h2 class="text-4xl font-bold text-blue-700 mb-6">Upload Your Lecture Slides</h2>
+    <p class="text-gray-600 mb-10 text-lg">Choose your note style and generate AI-powered notes instantly.</p>
+
+    <div class="mx-auto glass shadow-lg rounded-2xl p-10 w-full max-w-lg border border-gray-100">
+      <form id="uploadForm" enctype="multipart/form-data">
+        <!-- Upload -->
+        <label class="block text-gray-700 font-semibold mb-3">Select Your Lecture File</label>
+        <input type="file" name="file" id="fileInput" required
+               class="w-full border-2 border-dashed border-blue-300 p-6 rounded-lg cursor-pointer text-gray-500 hover:border-blue-500 bg-blue-50/40 transition" />
+
+        <!-- Style -->
+        <label class="block text-gray-700 font-semibold mt-6 mb-3">Choose Your Note Style</label>
+        <select name="style"
+                class="w-full border border-gray-300 rounded-lg p-3 bg-white focus:border-blue-500 focus:ring-blue-500">
+          <option value="outline">Simple Outline</option>
+          <option value="detailed">Detailed Notes</option>
+          <option value="cheatsheet">Cheat Sheet</option>
+        </select>
+
+        <!-- Save Location -->
+        <div class="mt-8 text-center">
+          <div class="inline-flex items-center justify-center gap-2 text-gray-700 font-semibold mb-3 relative group">
+            <img src="https://www.gstatic.com/images/branding/product/2x/drive_2020q4_48dp.png"
+                 class="w-5 h-5" alt="Google Drive">
+            <span>Select Google Drive Folder</span>
+
+            <!-- Info icon (clean blue circle, no outline issues) -->
+            <span class="relative text-blue-600 cursor-pointer text-sm font-semibold">
+              <svg xmlns="http://www.w3.org/2000/svg"
+                   viewBox="0 0 24 24"
+                   fill="none"
+                   stroke="#2563eb"
+                   stroke-width="2"
+                   stroke-linecap="round"
+                   stroke-linejoin="round"
+                   class="w-4 h-4 inline-block align-middle">
+                <circle cx="12" cy="12" r="10" stroke="#2563eb" fill="#eff6ff"/>
+                <line x1="12" y1="16" x2="12" y2="12"/>
+                <circle cx="12" cy="8" r="0.8" fill="#2563eb"/>
+              </svg>
+
+              <!-- Tooltip -->
+              <span class="absolute hidden group-hover:block bg-white text-gray-700 text-xs p-3 rounded shadow-md top-7 left-1/2 transform -translate-x-1/2 w-64 z-50 text-left">
+                Choose where your notes will be saved in Google Drive.<br><br>
+                Select a semester and course folder, or create new ones if needed.
+              </span>
+            </span>
+          </div>
+        </div>
+
+        <div class="space-y-4 text-left">
+          <!-- Term -->
+          <div>
+            <label class="text-sm text-gray-600 font-medium">Semester / Quarter</label>
+            <div class="flex gap-2 mt-1">
+              <select name="term" id="termSelect"
+                      class="flex-1 border border-gray-300 rounded-lg p-3 bg-white focus:border-blue-500 focus:ring-blue-500">
+                <option value="">Loading...</option>
+              </select>
+              <button type="button" id="newTermBtn"
+                      class="bg-blue-100 hover:bg-blue-200 text-blue-700 text-sm px-3 py-1 rounded-lg shadow-sm">
+                + New
+              </button>
+            </div>
+          </div>
+
+          <!-- Course -->
+          <div>
+            <label class="text-sm text-gray-600 font-medium">Course Folder</label>
+            <div class="flex gap-2 mt-1">
+              <select name="course" id="courseSelect"
+                      class="flex-1 border border-gray-300 rounded-lg p-3 bg-white focus:border-blue-500 focus:ring-blue-500">
+                <option value="">Select a term first</option>
+              </select>
+              <button type="button" id="newCourseBtn"
+                      class="bg-blue-100 hover:bg-blue-200 text-blue-700 text-sm px-3 py-1 rounded-lg shadow-sm opacity-60 cursor-not-allowed"
+                      disabled>
+                + New
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <p id="folderHint" class="text-sm text-gray-500 mt-3 text-center hidden">
+          📁 Please select both a semester and course to continue.
+        </p>
+
+        <input type="hidden" name="filename" id="autoFilename" />
+
+        <!-- Loading progress -->
+        <div id="loadingStatus" class="hidden mt-8 text-left bg-blue-50 border border-blue-200 rounded-xl p-4 shadow-sm">
+          <p id="loadingMessage" class="text-blue-700 font-medium text-sm flex items-center">
+            <span id="loadingIcon" class="mr-2">💭</span> Preparing your file...
+          </p>
+          <div class="w-full bg-blue-100 rounded-full h-2 mt-3">
+            <div id="loadingBar" class="bg-blue-500 h-2 rounded-full transition-all duration-700" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <button id="generateBtn" type="submit"
+                class="mt-8 w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 rounded-xl shadow-md transition transform hover:scale-[1.02] opacity-60 cursor-not-allowed"
+                disabled>
+          Generate Notes
+        </button>
+      </form>
+    </div>
+
+    <!-- Results -->
+    <div id="results" class="hidden mt-12 glass p-8 rounded-2xl shadow-lg max-w-3xl mx-auto border border-gray-100 text-left">
+      <h3 class="text-2xl font-bold text-blue-700 mb-4">Your Notes Are Ready!</h3>
+      <div id="notesOutput" class="text-gray-700 leading-relaxed text-left whitespace-pre-wrap"></div>
+      <div id="driveLinkContainer" class="mt-6 hidden">
+        <a id="driveLink" href="#" target="_blank"
+          class="inline-block bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-5 py-2 rounded-lg text-sm shadow-md">
+          Open in Google Drive
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="bg-white/80 backdrop-blur-md text-gray-500 text-sm py-6 text-center border-t border-gray-200">
+    © 2025 EasyNote AI by Everyday Intelligence
+  </footer>
+
+  <script>
+    const form = document.getElementById("uploadForm");
+    const fileInput = document.getElementById("fileInput");
+    const filenameField = document.getElementById("autoFilename");
+    const results = document.getElementById("results");
+    const notesOutput = document.getElementById("notesOutput");
+    const driveLinkContainer = document.getElementById("driveLinkContainer");
+    const driveLink = document.getElementById("driveLink");
+    const termSelect = document.getElementById("termSelect");
+    const courseSelect = document.getElementById("courseSelect");
+    const loadingCard = document.getElementById("loadingStatus");
+    const loadingMessage = document.getElementById("loadingMessage");
+    const loadingBar = document.getElementById("loadingBar");
+    const generateBtn = document.getElementById("generateBtn");
+    const folderHint = document.getElementById("folderHint");
+
+    // Validate selection state
+    function validateSelections() {
+      const termSelected = termSelect.value.trim() !== "";
+      const courseSelected = courseSelect.value.trim() !== "";
+      const ready = termSelected && courseSelected;
+      generateBtn.disabled = !ready;
+      generateBtn.classList.toggle("opacity-60", !ready);
+      generateBtn.classList.toggle("cursor-not-allowed", !ready);
+      folderHint.classList.toggle("hidden", ready);
+    }
+
+    termSelect.addEventListener("change", () => {
+      validateSelections();
+      validateCourseButton();
+    });
+    courseSelect.addEventListener("change", validateSelections);
+    validateSelections();
+
+    // Disable "+New Course" until a term is selected
+    function validateCourseButton() {
+      const termSelected = termSelect.value.trim() !== "";
+      const newCourseBtn = document.getElementById("newCourseBtn");
+      newCourseBtn.disabled = !termSelected;
+      newCourseBtn.classList.toggle("opacity-60", !termSelected);
+      newCourseBtn.classList.toggle("cursor-not-allowed", !termSelected);
+    }
+
+    // Auto filename
+    fileInput.addEventListener("change", () => {
+      if (fileInput.files.length > 0) {
+        const name = fileInput.files[0].name.replace(/\.[^/.]+$/, "");
+        filenameField.value = name + "_Notes.docx";
+      }
+    });
+
+    // Fancy loading sequence
+    const loadingSteps = [
+      { text: "📂 Reading your slides...", progress: 20 },
+      { text: "🧠 Thinking through your content...", progress: 40 },
+      { text: "✨ Creating AI-powered notes...", progress: 70 },
+      { text: "☁️ Uploading to Google Drive...", progress: 90 },
+    ];
+
+    function startLoading() {
+      loadingCard.classList.remove("hidden");
+      loadingBar.style.width = "0%";
+      let i = 0;
+      function nextStep() {
+        if (i < loadingSteps.length) {
+          const step = loadingSteps[i];
+          loadingMessage.innerText = step.text;
+          loadingBar.style.width = `${step.progress}%`;
+          i++;
+          setTimeout(nextStep, 2000);
+        }
+      }
+      nextStep();
+    }
+
+    function finishLoading(success = true) {
+      loadingMessage.innerText = success
+        ? "✅ All done! Your notes are ready."
+        : "❌ Something went wrong.";
+      loadingBar.style.width = "100%";
+      setTimeout(() => loadingCard.classList.add("hidden"), 2500);
+    }
+
+    // Load folders
+    async function loadFolders() {
+      termSelect.innerHTML = "<option>Loading...</option>";
+      try {
+        const res = await fetch("/drive/folders");
+        const data = await res.json();
+        window.cachedDriveData = data;
+        const folders = data.folders || {};
+        termSelect.innerHTML = '<option value="">Select a term</option>';
+        Object.keys(folders)
+          .filter(f => f && f.toLowerCase() !== "new folder")
+          .forEach(term => {
+            const opt = document.createElement("option");
+            opt.value = term;
+            opt.textContent = term;
+            termSelect.appendChild(opt);
+          });
+      } catch {
+        termSelect.innerHTML = "<option>Error loading folders</option>";
+      }
+    }
+
+    termSelect.addEventListener("change", () => {
+      const selectedTerm = termSelect.value;
+      const folders = window.cachedDriveData?.folders || {};
+      const courses = (folders[selectedTerm] || []).filter(c => c.toLowerCase() !== "new folder");
+      courseSelect.innerHTML = "";
+      if (courses.length === 0) {
+        courseSelect.innerHTML = "<option>No courses found</option>";
+      } else {
+        courses.forEach(course => {
+          const opt = document.createElement("option");
+          opt.value = course;
+          opt.textContent = course;
+          courseSelect.appendChild(opt);
+        });
+      }
+      validateCourseButton();
+    });
+
+    document.getElementById("newTermBtn").addEventListener("click", async () => {
+      const name = prompt("Enter new semester/term (e.g., Fall 2025):");
+      if (!name) return;
+      await fetch("/drive/folders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, level: "term" })
+      });
+      showToast("📁 New term folder created!");
+      loadFolders();
+    });
+
+    document.getElementById("newCourseBtn").addEventListener("click", async () => {
+      const term = termSelect.value;
+      if (!term) return alert("Select a term first.");
+      const name = prompt("Enter course name (e.g., CS157A – Database Systems):");
+      if (!name) return;
+      await fetch("/drive/folders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, parent: term, level: "course" })
+      });
+      showToast("📘 New course folder created!");
+      loadFolders();
+    });
+
+    // Submit
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      startLoading();
+      try {
+        const response = await fetch("/generate", { method: "POST", body: formData });
+        const data = await response.json();
+        results.classList.remove("hidden");
+        notesOutput.innerText = data.notes || `Error: ${data.error || "No notes generated."}`;
+        if (data.drive_link) {
+          driveLink.href = data.drive_link;
+          driveLinkContainer.classList.remove("hidden");
+          finishLoading(true);
+          showToast("✨ Notes uploaded to Google Drive!");
+        } else {
+          driveLinkContainer.classList.add("hidden");
+          finishLoading(false);
+        }
+      } catch {
+        alert("An error occurred while generating notes.");
+        finishLoading(false);
+      }
+    });
+
+    // Avatar dropdown
+    const avatarBtn = document.getElementById("avatarBtn");
+    const profileMenu = document.getElementById("profileMenu");
+    avatarBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      profileMenu.classList.toggle("hidden");
+    });
+    document.addEventListener("click", (e) => {
+      if (!avatarBtn.contains(e.target) && !profileMenu.contains(e.target)) {
+        profileMenu.classList.add("hidden");
+      }
+    });
+
+    // Toast
+    function showToast(message) {
+      const toast = document.createElement("div");
+      toast.className =
+        "fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white text-sm px-6 py-3 rounded-xl shadow-lg fade-up";
+      toast.innerText = message;
+      document.body.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = "0";
+        toast.style.transform = "translate(-50%, 20px)";
+      }, 2500);
+      setTimeout(() => toast.remove(), 3000);
+    }
+
+    loadFolders();
+  </script>
+</body>
+</html>
