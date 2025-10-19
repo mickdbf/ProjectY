@@ -1,10 +1,14 @@
 # app/main.py
+from dotenv import load_dotenv
+load_dotenv()
+
 from fastapi import FastAPI
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from app.routes import auth_routes, notes_routes
 import os
+
 
 # -----------------------------
 # ENVIRONMENT CONFIGURATION

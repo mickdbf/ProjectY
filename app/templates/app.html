@@ -12,9 +12,7 @@
     }
     .fade-up { animation: fadeUp 1s ease-out both; }
 
-    * {
-      transition: all 0.2s ease-in-out;
-    }
+    * { transition: all 0.2s ease-in-out; }
 
     body {
       background:
@@ -31,6 +29,11 @@
       background: rgba(255, 255, 255, 0.85);
       backdrop-filter: blur(8px);
     }
+
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
   </style>
 </head>
 
@@ -41,27 +44,27 @@
       EasyNote <span class="text-indigo-600">AI</span>
     </h1>
 
-    <!-- User Info with dropdown and fallback avatar -->
+    <!-- User Info -->
     <div class="relative flex items-center space-x-4">
       <div class="text-right">
         <p class="text-sm text-gray-700 font-semibold">Welcome</p>
         <p class="text-sm text-gray-500">{{ user_email }}</p>
       </div>
 
-      <!-- Avatar / Initial -->
-      <div id="avatarBtn" class="relative cursor-pointer">
-        {% if user_picture %}
-          <img src="{{ user_picture }}" alt="User Avatar"
-               class="w-9 h-9 rounded-full border border-gray-300 shadow-sm hover:ring-2 hover:ring-blue-400" />
-        {% else %}
-          <div class="w-9 h-9 rounded-full flex items-center justify-center font-semibold text-white bg-gradient-to-r from-blue-500 to-indigo-500 shadow-sm hover:ring-2 hover:ring-blue-400">
-            {{ user_email[0]|upper }}
-          </div>
-        {% endif %}
-      </div>
+      {% if user_picture %}
+        <img src="{{ user_picture }}" alt="User Avatar"
+             class="w-9 h-9 rounded-full border border-gray-300 shadow-sm hover:ring-2 hover:ring-blue-400 cursor-pointer"
+             id="avatarBtn" />
+      {% else %}
+        <div id="avatarBtn"
+             class="w-9 h-9 rounded-full flex items-center justify-center font-semibold text-white bg-gradient-to-r from-blue-500 to-indigo-500 shadow-sm hover:ring-2 hover:ring-blue-400 cursor-pointer">
+          {{ user_email[0]|upper }}
+        </div>
+      {% endif %}
 
-      <!-- Dropdown Menu -->
-      <div id="profileMenu" class="absolute top-12 right-0 bg-white/95 backdrop-blur-md border border-gray-200 rounded-xl shadow-lg hidden w-40 text-sm">
+      <!-- Dropdown -->
+      <div id="profileMenu"
+           class="absolute top-12 right-0 bg-white/95 backdrop-blur-md border border-gray-200 rounded-xl shadow-lg hidden w-40 text-sm">
         <a href="https://drive.google.com/drive/my-drive" target="_blank"
            class="block px-4 py-2 text-gray-700 hover:bg-blue-50 rounded-t-xl">My Drive</a>
         <a href="/logout"
@@ -78,7 +81,7 @@
     <div class="mx-auto glass shadow-lg rounded-2xl p-10 w-full max-w-lg border border-gray-100">
       <form id="uploadForm" enctype="multipart/form-data">
         <label class="block text-gray-700 font-semibold mb-3">Select your lecture file</label>
-        <input type="file" name="file"
+        <input type="file" name="file" required
                class="w-full border-2 border-dashed border-blue-300 p-6 rounded-lg cursor-pointer text-gray-500 hover:border-blue-500 bg-blue-50/40 transition" />
 
         <label class="block text-gray-700 font-semibold mt-6 mb-3">Choose your note style</label>
@@ -97,9 +100,18 @@
     </div>
 
     <!-- Results Section -->
-    <div id="results" class="hidden mt-12 glass p-8 rounded-2xl shadow-lg max-w-2xl mx-auto border border-gray-100 text-left">
+    <div id="results" class="hidden mt-12 glass p-8 rounded-2xl shadow-lg max-w-3xl mx-auto border border-gray-100 text-left">
       <h3 class="text-2xl font-bold text-blue-700 mb-4">Your Notes Are Ready!</h3>
-      <ul id="fileList" class="space-y-4"></ul>
+
+      <div id="notesOutput" class="text-gray-700 leading-relaxed text-left whitespace-pre-wrap"></div>
+
+      <!-- Drive Link -->
+      <div id="driveLinkContainer" class="mt-6 hidden">
+        <a id="driveLink" href="#" target="_blank"
+           class="inline-block bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-5 py-2 rounded-lg text-sm shadow-md">
+          Open in Google Drive
+        </a>
+      </div>
     </div>
   </section>
 
@@ -111,7 +123,9 @@
   <script>
     const form = document.getElementById("uploadForm");
     const results = document.getElementById("results");
-    const fileList = document.getElementById("fileList");
+    const notesOutput = document.getElementById("notesOutput");
+    const driveLinkContainer = document.getElementById("driveLinkContainer");
+    const driveLink = document.getElementById("driveLink");
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -128,19 +142,21 @@
         const data = await response.json();
 
         results.classList.remove("hidden");
-        fileList.innerHTML = data.files.map(
-          f => `
-            <li class="flex justify-between items-center border-b pb-3">
-              <div>
-                <h4 class="font-semibold text-gray-800">${f.name}</h4>
-                <p class="text-sm text-gray-500">Saved to Google Drive just now</p>
-              </div>
-              <a href="${f.link}" target="_blank"
-                 class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-sm transition">Open</a>
-            </li>`
-        ).join("");
 
-        showToast("Notes saved to Google Drive");
+        // Display AI-generated notes
+        notesOutput.innerText = data.notes || `Error: ${data.error || "No notes generated."}`;
+
+        // Display Drive link if available
+        if (data.drive_link) {
+          driveLink.href = data.drive_link;
+          driveLinkContainer.classList.remove("hidden");
+          showToast("Notes uploaded to Google Drive!");
+        } else {
+          driveLinkContainer.classList.add("hidden");
+        }
+
+      } catch (err) {
+        alert("An error occurred while generating notes.");
       } finally {
         button.disabled = false;
         button.innerText = oldText;
@@ -148,20 +164,13 @@
       }
     });
 
-    // Profile menu toggle
+    // Profile dropdown
     const avatarBtn = document.getElementById("avatarBtn");
     const profileMenu = document.getElementById("profileMenu");
-    let menuVisible = false;
-
-    avatarBtn.addEventListener("click", () => {
-      menuVisible = !menuVisible;
-      profileMenu.classList.toggle("hidden", !menuVisible);
-    });
-
+    avatarBtn.addEventListener("click", () => profileMenu.classList.toggle("hidden"));
     document.addEventListener("click", (e) => {
       if (!avatarBtn.contains(e.target) && !profileMenu.contains(e.target)) {
         profileMenu.classList.add("hidden");
-        menuVisible = false;
       }
     });
 
