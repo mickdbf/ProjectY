@@ -8,95 +8,110 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 def build_prompt(text, style, audience="college", depth="balanced", tone="neutral", extras=None):
     """
     Construct a prompt that guarantees structured, machine-readable note output
-    using EasyNote Markup (ENM) syntax.
-
-    Parameters:
-    - text: raw lecture or slide text
-    - style: output style ("outline", "detailed", "cheatsheet")
-    - audience: intended reader ("college", "beginner", "researcher", "professional")
-    - depth: content depth ("concise", "balanced", "in-depth")
-    - tone: writing tone ("neutral", "friendly", "formal", "academic")
-    - extras: optional list of extra behaviors (["summary", "highlight_terms"])
+    using EasyNote Markup (ENM) syntax, tuned for distinct note styles.
     """
 
     # ---------------------------------------------
-    # 1️⃣ Base format rules (ENM spec)
+    # 1️⃣ Base ENM specification
     # ---------------------------------------------
     base_intro = (
-        "You are EasyNote AI, an assistant that transforms lecture slides into "
-        "well-organized, student-friendly notes for college study.\n\n"
-        "OUTPUT FORMAT — EASYNOTE MARKUP (ENM):\n"
-        "Use the following tags exactly:\n"
+        "You are EasyNote AI — an assistant that converts lecture slides into organized, "
+        "student-friendly notes using the EASYNOTE MARKUP (ENM) format.\n\n"
+        "ENM TAGS:\n"
         "  #SECTION <name>        → major topic header\n"
         "  #SUBSECTION <name>     → subtopic header\n"
         "  #POINT <text>          → bullet or key/value item\n"
         "  #NOTE <text>           → short paragraph or explanation\n"
-        "  #CODE / #ENDCODE       → wrap any code examples\n"
-        "  #DIVIDER               → horizontal break (used sparingly)\n"
-        "  #QUOTE <text>          → quote or emphasized statement\n"
-        "\n"
+        "  #CODE / #ENDCODE       → wrap code, formula, or example blocks\n"
+        "  #DIVIDER               → horizontal break between major ideas\n"
+        "  #QUOTE <text>          → quote or highlighted rule\n\n"
         "RULES:\n"
-        "- Output plain text only (no Markdown, emojis, or decorative symbols).\n"
-        "- Each tag must appear on its own line.\n"
-        "- Leave one blank line between sections.\n"
-        "- Do NOT include --- lines, emojis, or decorative formatting.\n"
-        "- Keep the format strictly structured; this text will be parsed by software.\n\n"
-        "Here is the lecture content:\n\n"
+        "- Plain text only (no Markdown, emojis, or decorative lines).\n"
+        "- One tag per line; blank line between sections.\n"
+        "- No extra commentary or formatting outside ENM.\n\n"
+        "LECTURE CONTENT STARTS BELOW:\n\n"
     )
 
     # ---------------------------------------------
-    # 2️⃣ Style-specific instructions
+    # 2️⃣ Style-Specific Writing Directives
     # ---------------------------------------------
     style_instructions = {
         "outline": (
-            "Summarize the material hierarchically. "
-            "Use #SECTION for main topics, #SUBSECTION for subtopics, "
-            "and #POINT for concise key ideas or facts."
+            "STYLE: SIMPLE OUTLINE\n"
+            "→ Goal: Provide a clear, hierarchical summary for quick scanning.\n"
+            "→ Structure:\n"
+            "   - Use #SECTION and #SUBSECTION to mirror slide organization.\n"
+            "   - Use #POINT for short bullet ideas (5–12 words each).\n"
+            "→ Language:\n"
+            "   - Write in phrases, not sentences.\n"
+            "   - Avoid #NOTE or long paragraphs.\n"
+            "   - Emphasize structure over detail.\n"
+            "→ Example:\n"
+            "   #SECTION Databases\n"
+            "   #SUBSECTION SQL Basics\n"
+            "   #POINT SELECT retrieves data\n"
+            "   #POINT WHERE filters results"
         ),
         "detailed": (
-            "Write comprehensive notes. "
-            "Use #SECTION for main topics, #SUBSECTION for subtopics, "
-            "#POINT for facts, and #NOTE for explanations. "
-            "Include examples using #CODE / #ENDCODE when applicable."
+            "STYLE: DETAILED NOTES\n"
+            "→ Goal: Recreate rich lecture notes with explanations, transitions, and examples.\n"
+            "→ Structure:\n"
+            "   - Use #SECTION for main topics and #SUBSECTION for slide groups.\n"
+            "   - Use #POINT for facts and key steps.\n"
+            "   - Use #NOTE for short explanatory paragraphs.\n"
+            "   - Include #CODE / #ENDCODE for formulas or snippets.\n"
+            "→ Language:\n"
+            "   - Write in full sentences and connected paragraphs.\n"
+            "   - Maintain clarity and logical flow, as if explaining to classmates.\n"
+            "→ Example:\n"
+            "   #SECTION Transactions\n"
+            "   #POINT A transaction is a unit of work.\n"
+            "   #NOTE Transactions ensure data consistency and integrity across operations."
         ),
         "cheatsheet": (
-            "Create a compact cheat sheet. "
-            "Use #SECTION headers and #POINT lines for terms, definitions, or formulas. "
-            "Keep it tightly formatted and scannable."
+            "STYLE: CHEAT SHEET\n"
+            "→ Goal: Produce a condensed, exam-review version — dense, formulaic, and minimal.\n"
+            "→ Structure:\n"
+            "   - Use #SECTION for main concepts.\n"
+            "   - Use #POINT lines for terms, definitions, and formulas.\n"
+            "   - Use #QUOTE for key rules, principles, or quick reminders.\n"
+            "→ Language:\n"
+            "   - Ultra-concise (one line per idea).\n"
+            "   - Prefer symbols, abbreviations, or compact phrasing.\n"
+            "   - Avoid #NOTE and long sentences.\n"
+            "→ Example:\n"
+            "   #SECTION Normal Forms\n"
+            "   #POINT 1NF → No repeating groups\n"
+            "   #POINT 2NF → 1NF + no partial dependency\n"
+            "   #QUOTE Keep each table single-purpose!"
         ),
-    }.get(style, "Use #SECTION headers and #POINT lines with optional #NOTE paragraphs.")
+    }.get(style, "Use #SECTION headers and #POINT lines with short #NOTE explanations.")
 
     # ---------------------------------------------
     # 3️⃣ Audience context
     # ---------------------------------------------
-    if audience == "beginner":
-        audience_hint = "Write for beginners. Use simple language and short explanations."
-    elif audience == "college":
-        audience_hint = "Write for undergraduate students. Use clear examples and moderate technicality."
-    elif audience == "researcher":
-        audience_hint = "Write for researchers. Use precise academic phrasing and retain formal structure."
-    elif audience == "professional":
-        audience_hint = "Write for professionals. Focus on practical applications and advanced terminology."
-    else:
-        audience_hint = "Write clearly and appropriately for a general audience."
+    audience_hint = {
+        "beginner": "Write for beginners — simple language and concrete examples.",
+        "college": "Write for undergraduate students — clear, structured, moderate technicality.",
+        "researcher": "Write for researchers — maintain precision, academic tone, and clarity.",
+        "professional": "Write for professionals — emphasize real-world applications and insights."
+    }.get(audience, "Write clearly and appropriately for a general audience.")
 
     # ---------------------------------------------
     # 4️⃣ Depth and tone modifiers
     # ---------------------------------------------
-    depth_map = {
-        "concise": "Be brief and to the point. Summarize essential ideas only.",
-        "balanced": "Provide moderate detail — key ideas with short supporting notes.",
-        "in-depth": "Include detailed explanations, rationale, and examples where relevant."
-    }
-    tone_map = {
-        "neutral": "Maintain an objective and academic tone.",
-        "friendly": "Use a warm, encouraging tone while remaining professional.",
-        "formal": "Maintain formal academic language.",
-        "academic": "Adopt scholarly tone, avoid casual expressions."
-    }
+    depth_hint = {
+        "concise": "Be brief and to the point; only essential ideas.",
+        "balanced": "Provide key ideas with short supporting explanations.",
+        "in-depth": "Expand on reasoning, relationships, and examples in detail."
+    }.get(depth, "Provide moderate detail — key ideas with short supporting notes.")
 
-    depth_hint = depth_map.get(depth, depth_map["balanced"])
-    tone_hint = tone_map.get(tone, tone_map["neutral"])
+    tone_hint = {
+        "neutral": "Maintain an objective, academic tone.",
+        "friendly": "Use a warm, encouraging tone while staying professional.",
+        "formal": "Use polished, formal academic phrasing.",
+        "academic": "Adopt a scholarly tone with precise terminology."
+    }.get(tone, "Maintain an objective, academic tone.")
 
     # ---------------------------------------------
     # 5️⃣ Optional extras
@@ -109,17 +124,15 @@ def build_prompt(text, style, audience="college", depth="balanced", tone="neutra
             )
         if "highlight_terms" in extras:
             extra_instructions.append(
-                "Emphasize important terms using ALL CAPS (e.g., DATABASE, NORMALIZATION)."
+                "Emphasize critical terms using ALL CAPS (e.g., DATABASE, NORMALIZATION)."
             )
         if "glossary" in extras:
             extra_instructions.append(
-                "Include a final #SECTION Glossary listing key terms and short definitions."
+                "Include a #SECTION Glossary with concise definitions for key terms."
             )
 
-    extra_text = "\n".join(extra_instructions)
-
     # ---------------------------------------------
-    # 6️⃣ Combine everything
+    # 6️⃣ Combine all prompt parts
     # ---------------------------------------------
     final_prompt = (
         f"{base_intro}{text[:6000]}\n\n"
@@ -127,15 +140,14 @@ def build_prompt(text, style, audience="college", depth="balanced", tone="neutra
         f"{audience_hint}\n"
         f"{depth_hint}\n"
         f"{tone_hint}\n"
-        f"{extra_text}"
+        f"{' '.join(extra_instructions)}"
     )
 
     return final_prompt
 
 
-
 async def generate_notes_from_llm(text, style):
-    """Processes slide text with LLM asynchronously and normalizes output."""
+    """Generate AI-structured notes asynchronously and normalize output."""
     prompt = build_prompt(text, style)
 
     response = await asyncio.to_thread(
@@ -144,11 +156,11 @@ async def generate_notes_from_llm(text, style):
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a helpful academic assistant that creates structured notes in EasyNote Markup (ENM) format."
+                    "content": "You are a precise academic assistant that outputs notes strictly in EasyNote Markup (ENM) format."
                 },
                 {"role": "user", "content": prompt},
             ],
-            temperature=0.7,
+            temperature=0.65,
         )
     )
 

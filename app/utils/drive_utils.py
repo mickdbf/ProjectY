@@ -2,24 +2,23 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 import json
 
-def upload_to_drive(credentials_json, local_path, filename, style_folder="General"):
-    """Uploads a DOCX file and converts it into a native Google Doc in the user's Drive."""
+def upload_to_drive(credentials_json, local_path, filename, term_folder="Unsorted", course_folder="General"):
+    """Uploads a DOCX file into EasyNote AI/{term}/{course}, converting it to a Google Doc."""
     from google.oauth2.credentials import Credentials
 
     creds = Credentials.from_authorized_user_info(json.loads(credentials_json))
     service = build("drive", "v3", credentials=creds)
 
-    # --- ensure EasyNote AI base folder exists ---
-    folder_id = ensure_folder(service, "EasyNote AI")
+    # --- Ensure folder hierarchy ---
+    base_id = ensure_folder(service, "EasyNote AI")
+    term_id = ensure_folder(service, term_folder, parent_id=base_id)
+    course_id = ensure_folder(service, course_folder, parent_id=term_id)
 
-    # --- ensure style-based subfolder exists ---
-    subfolder_id = ensure_folder(service, style_folder, parent_id=folder_id)
-
-    # --- upload file (convert to native Google Doc) ---
+    # --- Upload and convert ---
     file_metadata = {
         "name": filename,
-        "parents": [subfolder_id],
-        "mimeType": "application/vnd.google-apps.document",  # ✅ this does the magic
+        "parents": [course_id],
+        "mimeType": "application/vnd.google-apps.document",
     }
 
     media = MediaFileUpload(
@@ -49,12 +48,9 @@ def ensure_folder(service, folder_name, parent_id=None):
     if folders:
         return folders[0]["id"]
 
-    file_metadata = {
-        "name": folder_name,
-        "mimeType": "application/vnd.google-apps.folder",
-    }
+    metadata = {"name": folder_name, "mimeType": "application/vnd.google-apps.folder"}
     if parent_id:
-        file_metadata["parents"] = [parent_id]
+        metadata["parents"] = [parent_id]
 
-    folder = service.files().create(body=file_metadata, fields="id").execute()
+    folder = service.files().create(body=metadata, fields="id").execute()
     return folder.get("id")

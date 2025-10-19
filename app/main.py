@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from app.routes import auth_routes, notes_routes
+from app.routes import auth_routes, notes_routes, drive_routes  # ✅ Added drive_routes
 import os
 
 
@@ -27,7 +27,11 @@ IS_PRODUCTION = os.environ.get("ENVIRONMENT") == "production"
 # APP INITIALIZATION
 # -----------------------------
 
-app = FastAPI(title="EasyNote AI", description="AI-powered lecture note generator")
+app = FastAPI(
+    title="EasyNote AI",
+    description="AI-powered lecture note generator",
+    version="1.0.0"
+)
 
 # Session middleware configuration
 app.add_middleware(
@@ -36,7 +40,7 @@ app.add_middleware(
     session_cookie="session",
     same_site="lax" if not IS_PRODUCTION else "none",
     https_only=IS_PRODUCTION,
-    max_age=3600,
+    max_age=3600,  # 1 hour session expiry
 )
 
 # Serve static files and Jinja templates
@@ -53,6 +57,9 @@ app.include_router(auth_routes.router)
 # AI Notes / LLM route
 app.include_router(notes_routes.router)
 
+# ✅ Drive folder management routes (for term/course selection UI)
+app.include_router(drive_routes.router)
+
 # -----------------------------
 # ROOT TEST ROUTE
 # -----------------------------
@@ -60,7 +67,10 @@ app.include_router(notes_routes.router)
 @app.get("/health")
 async def health_check():
     """Simple route to verify service health."""
-    return {"status": "ok", "environment": "production" if IS_PRODUCTION else "development"}
+    return {
+        "status": "ok",
+        "environment": "production" if IS_PRODUCTION else "development"
+    }
 
 # -----------------------------
 # RUN LOCALLY
