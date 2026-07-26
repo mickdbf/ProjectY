@@ -12,8 +12,11 @@ TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
 
-CLIENT_SECRETS_FILE = os.path.join(os.path.dirname(__file__), "../../client_secret.json")
-REDIRECT_URI = "http://localhost:8080/auth/callback"
+CLIENT_SECRETS_FILE = os.environ.get(
+    "GOOGLE_CLIENT_SECRETS_FILE",
+    os.path.join(os.path.dirname(__file__), "../../client_secret.json"),
+)
+REDIRECT_URI = os.environ.get("OAUTH_REDIRECT_URI", "http://localhost:8080/auth/callback")
 SCOPES = [
     "openid",
     "https://www.googleapis.com/auth/userinfo.email",

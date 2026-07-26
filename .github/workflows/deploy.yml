@@ -1,0 +1,52 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "**.md"
+  workflow_dispatch: {}
+
+env:
+  PROJECT_ID: easynote-ai-prod
+  REGION: us-central1
+  SERVICE: easynote-ai
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+          workload_identity_provider: projects/88917461300/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+          service_account: github-deployer@easynote-ai-prod.iam.gserviceaccount.com
+
+      - id: deploy
+        uses: google-github-actions/deploy-cloudrun@v2
+        with:
+          project_id: ${{ env.PROJECT_ID }}
+          region: ${{ env.REGION }}
+          service: ${{ env.SERVICE }}
+          source: .
+          flags: >-
+            --memory=512Mi
+            --cpu=1
+            --min-instances=0
+            --max-instances=2
+            --allow-unauthenticated
+          secrets: |
+            OPENAI_API_KEY=OPENAI_API_KEY:latest
+            SESSION_SECRET=SESSION_SECRET:latest
+          env_vars: |
+            ENVIRONMENT=production
+            OAUTH_REDIRECT_URI=${{ vars.OAUTH_REDIRECT_URI }}
+
+      - run: echo "Deployed to ${{ steps.deploy.outputs.url }}"
