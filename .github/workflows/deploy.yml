@@ -45,8 +45,10 @@ jobs:
           secrets: |
             OPENAI_API_KEY=OPENAI_API_KEY:latest
             SESSION_SECRET=SESSION_SECRET:latest
+            /secrets/client_secret.json=CLIENT_SECRET_JSON:latest
           env_vars: |
             ENVIRONMENT=production
             OAUTH_REDIRECT_URI=${{ vars.OAUTH_REDIRECT_URI }}
+            GOOGLE_CLIENT_SECRETS_FILE=/secrets/client_secret.json
 
       - run: echo "Deployed to ${{ steps.deploy.outputs.url }}"
