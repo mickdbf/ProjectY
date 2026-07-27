@@ -1,7 +1,7 @@
 # app/routes/notes_routes.py
 from fastapi import APIRouter, UploadFile, File, Form, Request, HTTPException
 from fastapi.responses import JSONResponse
-import tempfile, os
+import logging, tempfile, os
 
 from app.utils.file_extractors import extract_text_from_pdf, extract_text_from_pptx
 from app.utils.llm_utils import generate_notes_from_llm
@@ -85,4 +85,5 @@ async def generate_notes(
         })
 
     except Exception as e:
+        logging.exception("Error in /generate")
         return JSONResponse(content={"error": str(e)}, status_code=500)
